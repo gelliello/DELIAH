@@ -1,0 +1,15 @@
+# DELIAH
+
+*.db
+*.sqlite
+__pycache__/
+*.pyc
+.env
+node_modules/
+dist/
+build/
+*.exe
+*.apk
+*.aab
+.DS_Store
+Thumbs.db

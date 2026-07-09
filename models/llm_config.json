@@ -1,0 +1,56 @@
+{
+  "llm": {
+    "provider": "ollama",
+    "base_url": "http://localhost:11434",
+    "models": {
+      "coding": {
+        "primary": "deepseek-coder:6.7b",
+        "fallback": "qwen2.5-coder:7b",
+        "description": "Optimized for code generation, debugging, and programming tasks"
+      },
+      "planning": {
+        "primary": "qwen2.5:7b",
+        "fallback": "llama3.1:8b",
+        "description": "Best for strategic thinking, planning, and complex reasoning"
+      },
+      "general": {
+        "primary": "qwen2.5:7b",
+        "fallback": "llama3.1:8b",
+        "description": "General-purpose conversations, knowledge, and creativity"
+      },
+      "voice": {
+        "primary": "qwen2.5:3b",
+        "fallback": "phi3:3.8m",
+        "description": "Fast responses for voice interactions"
+      }
+    },
+    "routing": {
+      "auto_detect": true,
+      "keyword_matching": true,
+      "confidence_threshold": 0.6
+    },
+    "parameters": {
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "max_tokens": 4096,
+      "context_window": 8192
+    }
+  },
+  "recommended_models": {
+    "high_end": {
+      "ram": "16GB+",
+      "vram": "8GB+",
+      "models": ["deepseek-coder:33b", "qwen2.5:32b", "llama3.1:70b"]
+    },
+    "mid_range": {
+      "ram": "8-16GB",
+      "vram": "4-8GB",
+      "models": ["deepseek-coder:6.7b", "qwen2.5:7b", "llama3.1:8b"]
+    },
+    "low_end": {
+      "ram": "4-8GB",
+      "vram": "2-4GB",
+      "models": ["qwen2.5:3b", "phi3:3.8m", "gemma2:2b"]
+    }
+  }
+}
