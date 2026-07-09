@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Mic, Settings, Cpu, Database, Brain } from 'lucide-react';
+import { Send, Settings, Brain } from 'lucide-react';
 import './App.css';
 
 interface Message {
