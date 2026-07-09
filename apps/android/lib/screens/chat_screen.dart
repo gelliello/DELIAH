@@ -41,7 +41,7 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Icon(Icons.brain, color: Colors.cyan),
+            const Icon(Icons.psychology, color: Colors.cyan),
             const SizedBox(width: 8),
             const Text('DELIAH', style: TextStyle(letterSpacing: 2)),
             const SizedBox(width: 12),
@@ -72,7 +72,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.brain, size: 64, color: Colors.cyan),
+                        Icon(Icons.psychology, size: 64, color: Colors.cyan),
                         SizedBox(height: 16),
                         Text('DELIAH', style: TextStyle(fontSize: 24, letterSpacing: 4, color: Colors.cyan)),
                         SizedBox(height: 8),
