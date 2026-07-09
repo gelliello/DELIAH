@@ -52,7 +52,7 @@ jobs:
           cp flutter-apk/app-release.apk "staging/DELIAH-Android-${TAG}.apk"
           cp bundle/release/app-release.aab "staging/DELIAH-Android-${TAG}.aab"
 
-          cd staging && zip "DELIAH-Android-${TAG}.zip" *.apk *.aab
+          (cd staging && zip "DELIAH-Android-${TAG}.zip" *.apk *.aab)
 
           echo "Staged files:"
           ls -la staging/
