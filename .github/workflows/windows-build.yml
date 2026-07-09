@@ -3,12 +3,12 @@ name: DELIAH Windows Build
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
   build-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: apps/windows
@@ -44,9 +44,59 @@ jobs:
       - name: Build Desktop App (Tauri)
         run: npm run tauri build
 
-      - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v4
+      - name: Package Release Assets
+        shell: pwsh
+        working-directory: apps/windows/src-tauri/target/release/bundle
+        run: |
+          $tag = "Auto-Build-${{ github.run_number }}"
+          $date = Get-Date -Format "yyyy-MM-dd"
+
+          # Create staging directory
+          New-Item -ItemType Directory -Path "staging" -Force
+
+          # Copy MSI installer if it exists
+          if (Test-Path "msi/*.msi") {
+            Copy-Item "msi\*.msi" "staging\DELIAH-Windows-${tag}.msi"
+          }
+
+          # Copy NSIS installer if it exists
+          if (Test-Path "nsis/*.exe") {
+            Copy-Item "nsis\*.exe" "staging\DELIAH-Windows-${tag}-Setup.exe"
+          }
+
+          # Copy portable exe
+          if (Test-Path "../../deliah-desktop.exe") {
+            Copy-Item "../../deliah-desktop.exe" "staging\DELIAH-Windows-${tag}-Portable.exe"
+          }
+
+          # Create zip of all release files
+          Compress-Archive -Path "staging\*" -DestinationPath "staging\DELIAH-Windows-${tag}.zip"
+
+          Write-Output "Staged files:"
+          Get-ChildItem "staging"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: deliah-windows
-          path: apps/windows/src-tauri/target/release/bundle/
-          retention-days: 30
+          tag_name: Auto-Build-${{ github.run_number }}
+          name: "Auto-Build ${{ github.run_number }} - Windows"
+          body: |
+            ## DELIAH Windows Desktop App
+
+            **Build:** ${{ github.run_number }}
+            **Commit:** ${{ github.sha }}
+            **Date:** ${{ github.event.head_commit.timestamp }}
+
+            ### Installation
+            1. Download `DELIAH-Windows-Auto-Build-${{ github.run_number }}-Setup.exe` for installer
+            2. Or download `DELIAH-Windows-Auto-Build-${{ github.run_number }}-Portable.exe` for portable
+
+            ### Requirements
+            - [Ollama](https://ollama.ai) installed and running
+            - Python 3.11+ (for backend)
+          files: |
+            apps/windows/src-tauri/target/release/bundle/staging/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

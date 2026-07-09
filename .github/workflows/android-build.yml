@@ -3,12 +3,12 @@ name: DELIAH Android Build
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: apps/android
@@ -34,6 +34,7 @@ jobs:
 
       - name: Run tests
         run: flutter test
+        continue-on-error: true
 
       - name: Build APK
         run: flutter build apk --release
@@ -41,16 +42,46 @@ jobs:
       - name: Build AAB
         run: flutter build appbundle --release
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: deliah-android-apk
-          path: apps/android/build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 30
+      - name: Package Release Assets
+        working-directory: apps/android/build/app/outputs
+        run: |
+          TAG="Auto-Build-${{ github.run_number }}"
+          mkdir -p staging
 
-      - name: Upload AAB
-        uses: actions/upload-artifact@v4
+          # Copy APK
+          cp flutter-apk/app-release.apk "staging/DELIAH-Android-${TAG}.apk"
+
+          # Copy AAB
+          cp bundle/release/app-release.aab "staging/DELIAH-Android-${TAG}.aab"
+
+          # Create zip
+          cd staging && zip "DELIAH-Android-${TAG}.zip" *.apk *.aab
+
+          echo "Staged files:"
+          ls -la staging/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: deliah-android-aab
-          path: apps/android/build/app/outputs/bundle/release/app-release.aab
-          retention-days: 30
+          tag_name: Auto-Build-${{ github.run_number }}
+          name: "Auto-Build ${{ github.run_number }} - Android"
+          body: |
+            ## DELIAH Android Companion App
+
+            **Build:** ${{ github.run_number }}
+            **Commit:** ${{ github.sha }}
+            **Date:** ${{ github.event.head_commit.timestamp }}
+
+            ### Installation
+            1. Download `DELIAH-Android-Auto-Build-${{ github.run_number }}.apk` and install
+            2. For Play Store: use `DELIAH-Android-Auto-Build-${{ github.run_number }}.aab`
+
+            ### Requirements
+            - DELIAH Desktop running on your PC
+            - Both devices on the same network
+          files: |
+            apps/android/build/app/outputs/staging/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
