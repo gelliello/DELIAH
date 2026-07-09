@@ -44,28 +44,34 @@ jobs:
 
       - name: Package Release Assets
         shell: pwsh
-        working-directory: apps/windows/src-tauri/target/release/bundle
         run: |
           $tag = "Auto-Build-${{ github.run_number }}"
+          $bundleDir = "apps\windows\src-tauri\target\release\bundle"
 
-          New-Item -ItemType Directory -Path "staging" -Force
-
-          if (Test-Path "msi/*.msi") {
-            Copy-Item "msi\*.msi" "staging\DELIAH-Windows-${tag}.msi"
+          if (-not (Test-Path $bundleDir)) {
+            Write-Output "Bundle directory not found, checking alternatives..."
+            Get-ChildItem "apps\windows\src-tauri\target\release" -Directory
+            exit 1
           }
 
-          if (Test-Path "nsis/*.exe") {
-            Copy-Item "nsis\*.exe" "staging\DELIAH-Windows-${tag}-Setup.exe"
+          New-Item -ItemType Directory -Path "$bundleDir\staging" -Force
+
+          if (Test-Path "$bundleDir\msi\*.msi") {
+            Copy-Item "$bundleDir\msi\*.msi" "$bundleDir\staging\DELIAH-Windows-${tag}.msi"
           }
 
-          if (Test-Path "../../deliah-desktop.exe") {
-            Copy-Item "../../deliah-desktop.exe" "staging\DELIAH-Windows-${tag}-Portable.exe"
+          if (Test-Path "$bundleDir\nsis\*.exe") {
+            Copy-Item "$bundleDir\nsis\*.exe" "$bundleDir\staging\DELIAH-Windows-${tag}-Setup.exe"
           }
 
-          Compress-Archive -Path "staging\*" -DestinationPath "staging\DELIAH-Windows-${tag}.zip"
+          if (Test-Path "apps\windows\src-tauri\target\release\deliah-desktop.exe") {
+            Copy-Item "apps\windows\src-tauri\target\release\deliah-desktop.exe" "$bundleDir\staging\DELIAH-Windows-${tag}-Portable.exe"
+          }
+
+          Compress-Archive -Path "$bundleDir\staging\*" -DestinationPath "$bundleDir\staging\DELIAH-Windows-${tag}.zip"
 
           Write-Output "Staged files:"
-          Get-ChildItem "staging"
+          Get-ChildItem "$bundleDir\staging"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
