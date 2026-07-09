@@ -9,9 +9,6 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
-    defaults:
-      run:
-        working-directory: apps/windows
 
     steps:
       - name: Checkout code
@@ -42,6 +39,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Build Desktop App (Tauri)
+        working-directory: apps/windows
         run: npm run tauri build
 
       - name: Package Release Assets
@@ -49,27 +47,21 @@ jobs:
         working-directory: apps/windows/src-tauri/target/release/bundle
         run: |
           $tag = "Auto-Build-${{ github.run_number }}"
-          $date = Get-Date -Format "yyyy-MM-dd"
 
-          # Create staging directory
           New-Item -ItemType Directory -Path "staging" -Force
 
-          # Copy MSI installer if it exists
           if (Test-Path "msi/*.msi") {
             Copy-Item "msi\*.msi" "staging\DELIAH-Windows-${tag}.msi"
           }
 
-          # Copy NSIS installer if it exists
           if (Test-Path "nsis/*.exe") {
             Copy-Item "nsis\*.exe" "staging\DELIAH-Windows-${tag}-Setup.exe"
           }
 
-          # Copy portable exe
           if (Test-Path "../../deliah-desktop.exe") {
             Copy-Item "../../deliah-desktop.exe" "staging\DELIAH-Windows-${tag}-Portable.exe"
           }
 
-          # Create zip of all release files
           Compress-Archive -Path "staging\*" -DestinationPath "staging\DELIAH-Windows-${tag}.zip"
 
           Write-Output "Staged files:"

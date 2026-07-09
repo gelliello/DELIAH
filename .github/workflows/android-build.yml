@@ -9,9 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    defaults:
-      run:
-        working-directory: apps/android
 
     steps:
       - name: Checkout code
@@ -30,16 +27,20 @@ jobs:
           channel: 'stable'
 
       - name: Install dependencies
+        working-directory: apps/android
         run: flutter pub get
 
       - name: Run tests
+        working-directory: apps/android
         run: flutter test
         continue-on-error: true
 
       - name: Build APK
+        working-directory: apps/android
         run: flutter build apk --release
 
       - name: Build AAB
+        working-directory: apps/android
         run: flutter build appbundle --release
 
       - name: Package Release Assets
@@ -48,13 +49,9 @@ jobs:
           TAG="Auto-Build-${{ github.run_number }}"
           mkdir -p staging
 
-          # Copy APK
           cp flutter-apk/app-release.apk "staging/DELIAH-Android-${TAG}.apk"
-
-          # Copy AAB
           cp bundle/release/app-release.aab "staging/DELIAH-Android-${TAG}.aab"
 
-          # Create zip
           cd staging && zip "DELIAH-Android-${TAG}.zip" *.apk *.aab
 
           echo "Staged files:"
