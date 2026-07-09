@@ -42,36 +42,45 @@ jobs:
         working-directory: apps/windows
         run: npm run tauri build
 
-      - name: Package Release Assets
+      - name: Package Release
         shell: pwsh
         run: |
           $tag = "Auto-Build-${{ github.run_number }}"
-          $bundleDir = "apps\windows\src-tauri\target\release\bundle"
+          $releaseDir = "apps\windows\src-tauri\target\release"
+          $stagingDir = "release-staging"
 
-          if (-not (Test-Path $bundleDir)) {
-            Write-Output "Bundle directory not found, checking alternatives..."
-            Get-ChildItem "apps\windows\src-tauri\target\release" -Directory
-            exit 1
+          New-Item -ItemType Directory -Path $stagingDir -Force
+
+          # Find the built exe
+          $exe = Join-Path $releaseDir "deliah-desktop.exe"
+          if (Test-Path $exe) {
+            Copy-Item $exe "$stagingDir\DELIAH-Windows-${tag}-Portable.exe"
+            Write-Output "Found portable exe"
+          } else {
+            Write-Output "Looking for exe files..."
+            Get-ChildItem $releaseDir -Filter "*.exe" | ForEach-Object {
+              Write-Output $_.FullName
+            }
           }
 
-          New-Item -ItemType Directory -Path "$bundleDir\staging" -Force
-
-          if (Test-Path "$bundleDir\msi\*.msi") {
-            Copy-Item "$bundleDir\msi\*.msi" "$bundleDir\staging\DELIAH-Windows-${tag}.msi"
+          # Also check bundle directory for installers
+          $bundleDir = Join-Path $releaseDir "bundle"
+          if (Test-Path $bundleDir) {
+            Get-ChildItem $bundleDir -Recurse -Filter "*.msi" | ForEach-Object {
+              Copy-Item $_.FullName "$stagingDir\DELIAH-Windows-${tag}.msi"
+              Write-Output "Found MSI: $($_.Name)"
+            }
+            Get-ChildItem $bundleDir -Recurse -Filter "*.exe" | Where-Object { $_.Name -ne "deliah-desktop.exe" } | ForEach-Object {
+              Copy-Item $_.FullName "$stagingDir\DELIAH-Windows-${tag}-Setup.exe"
+              Write-Output "Found NSIS: $($_.Name)"
+            }
           }
 
-          if (Test-Path "$bundleDir\nsis\*.exe") {
-            Copy-Item "$bundleDir\nsis\*.exe" "$bundleDir\staging\DELIAH-Windows-${tag}-Setup.exe"
-          }
+          # Create zip
+          Compress-Archive -Path "$stagingDir\*" -DestinationPath "$stagingDir\DELIAH-Windows-${tag}.zip"
 
-          if (Test-Path "apps\windows\src-tauri\target\release\deliah-desktop.exe") {
-            Copy-Item "apps\windows\src-tauri\target\release\deliah-desktop.exe" "$bundleDir\staging\DELIAH-Windows-${tag}-Portable.exe"
-          }
-
-          Compress-Archive -Path "$bundleDir\staging\*" -DestinationPath "$bundleDir\staging\DELIAH-Windows-${tag}.zip"
-
-          Write-Output "Staged files:"
-          Get-ChildItem "$bundleDir\staging"
+          Write-Output "`nStaged files:"
+          Get-ChildItem $stagingDir
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -83,17 +92,14 @@ jobs:
 
             **Build:** ${{ github.run_number }}
             **Commit:** ${{ github.sha }}
-            **Date:** ${{ github.event.head_commit.timestamp }}
 
             ### Installation
-            1. Download `DELIAH-Windows-Auto-Build-${{ github.run_number }}-Setup.exe` for installer
-            2. Or download `DELIAH-Windows-Auto-Build-${{ github.run_number }}-Portable.exe` for portable
+            - Download and run `DELIAH-Windows-Auto-Build-${{ github.run_number }}-Portable.exe`
 
             ### Requirements
             - [Ollama](https://ollama.ai) installed and running
             - Python 3.11+ (for backend)
-          files: |
-            apps/windows/src-tauri/target/release/bundle/staging/*
+          files: release-staging/*
           draft: false
           prerelease: false
         env:
