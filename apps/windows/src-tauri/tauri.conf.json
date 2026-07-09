@@ -21,9 +21,7 @@
       "active": true,
       "targets": "all",
       "identifier": "com.deliah.desktop",
-      "icon": [
-        "icons/32x32.png"
-      ]
+      "icon": []
     },
     "security": {
       "csp": null
