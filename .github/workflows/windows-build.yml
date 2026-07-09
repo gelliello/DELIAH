@@ -52,13 +52,13 @@ jobs:
           New-Item -ItemType Directory -Path $stagingDir -Force
 
           # Find the built exe
-          $exe = Join-Path $releaseDir "deliah-desktop.exe"
+          $exe = Join-Path $releaseDir "DELIAH.exe"
           if (Test-Path $exe) {
             Copy-Item $exe "$stagingDir\DELIAH-Windows-${tag}-Portable.exe"
             Write-Output "Found portable exe"
           } else {
-            Write-Output "Looking for exe files..."
-            Get-ChildItem $releaseDir -Filter "*.exe" | ForEach-Object {
+            Write-Output "Looking for exe files in $releaseDir..."
+            Get-ChildItem $releaseDir -Filter "*.exe" -ErrorAction SilentlyContinue | ForEach-Object {
               Write-Output $_.FullName
             }
           }
