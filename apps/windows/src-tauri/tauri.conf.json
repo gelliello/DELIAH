@@ -29,12 +29,15 @@
     "windows": [
       {
         "title": "DELIAH",
-        "width": 1200,
-        "height": 800,
+        "width": 900,
+        "height": 720,
+        "minWidth": 600,
+        "minHeight": 480,
         "resizable": true,
         "fullscreen": false,
         "decorations": true,
-        "transparent": false
+        "transparent": false,
+        "center": true
       }
     ]
   }

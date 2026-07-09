@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DELIAH -- Your Personal Local AI Assistant</title>
+  <meta name="description" content="DELIAH is a privacy-first, local AI assistant with personality, voice, and modular architecture. Your data never leaves your machine.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --bg: #f5f0e8;
+      --bg-alt: #ebe4d8;
+      --paper: #faf7f2;
+      --text: #2c2418;
+      --text-secondary: #7a6e5e;
+      --text-muted: #a89e8e;
+      --accent: #c47832;
+      --accent-hover: #b56a28;
+      --accent-light: rgba(196, 120, 50, 0.12);
+      --border: #d4cbb8;
+      --border-light: #e4ddd0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .serif { font-family: 'Playfair Display', Georgia, serif; }
+
+    /* --- Nav --- */
+
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(245, 240, 232, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-light);
+      z-index: 100;
+      padding: 0 32px;
+    }
+
+    .nav-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-logo {
+      width: 30px;
+      height: 30px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fffdf9;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .nav-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* --- Hero --- */
+
+    .hero {
+      padding: 140px 32px 100px;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .hero-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--accent);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fffdf9;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 20px rgba(196, 120, 50, 0.25);
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.2rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .hero .tagline {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .hero .subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fffdf9;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(196, 120, 50, 0.25);
+    }
+
+    .btn-secondary {
+      background: var(--paper);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* --- Features --- */
+
+    .features {
+      padding: 80px 32px;
+    }
+
+    .features-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin-bottom: 48px;
+      line-height: 1.7;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--paper);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 28px;
+      transition: all 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(44, 36, 24, 0.06);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-light);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 1.2rem;
+    }
+
+    .feature-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* --- How It Works --- */
+
+    .how {
+      padding: 80px 32px;
+      background: var(--bg-alt);
+    }
+
+    .how-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      margin-top: 48px;
+    }
+
+    .step {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      color: #fffdf9;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-body h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+
+    .step-body p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .step-body code {
+      background: var(--paper);
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.82rem;
+      border: 1px solid var(--border-light);
+    }
+
+    /* --- Architecture --- */
+
+    .arch {
+      padding: 80px 32px;
+    }
+
+    .arch-inner {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .arch-diagram {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 36px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* --- Download --- */
+
+    .download {
+      padding: 80px 32px;
+      background: var(--bg-alt);
+      text-align: center;
+    }
+
+    .download-inner {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .download .section-title {
+      margin-bottom: 8px;
+    }
+
+    .download .section-desc {
+      margin: 0 auto 32px;
+    }
+
+    .download-btns {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* --- Footer --- */
+
+    footer {
+      padding: 40px 32px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* --- Responsive --- */
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.2rem; }
+      .hero .tagline { font-size: 1rem; }
+      .nav-links { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .step { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">
+        <div class="nav-logo">D</div>
+        <span class="nav-name serif">DELIAH</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">Setup</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="https://github.com/gelliello/DELIAH" target="_blank">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-icon">D</div>
+      <h1 class="serif">DELIAH</h1>
+      <p class="tagline serif">Your personal local intelligence assistant</p>
+      <p class="subtitle">
+        A privacy-first AI assistant that runs entirely on your machine.
+        Your conversations, your data, your computer. Nothing leaves.
+      </p>
+      <div class="hero-btns">
+        <a href="https://github.com/gelliello/DELIAH" class="btn btn-primary" target="_blank">
+          View on GitHub
+        </a>
+        <a href="#how" class="btn btn-secondary">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="features-inner">
+      <p class="section-label">Features</p>
+      <h2 class="section-title serif">Built for privacy. Designed for you.</h2>
+      <p class="section-desc">
+        DELIAH combines the power of modern language models with a completely local architecture.
+      </p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">&#128274;</div>
+          <h3 class="serif">100% Local</h3>
+          <p>Every conversation stays on your machine. No cloud, no tracking, no data leaks. Ever.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#129504;</div>
+          <h3 class="serif">Smart Routing</h3>
+          <p>DELIAH detects what you need -- coding, planning, or general chat -- and routes to the best model.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#127912;</div>
+          <h3 class="serif">Personality</h3>
+          <p>A unique AI character with moods, traits, and a consistent voice across all your conversations.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128203;</div>
+          <h3 class="serif">Memory</h3>
+          <p>Remembers your preferences, past conversations, and important details -- all in a local SQLite database.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#127908;</div>
+          <h3 class="serif">Voice Ready</h3>
+          <p>Built-in support for speech-to-text and text-to-speech with local and cloud options.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128268;</div>
+          <h3 class="serif">Extensible</h3>
+          <p>Plugin system for Minecraft, Discord, Arduino, smart home, OBS, and more.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="how-inner">
+      <p class="section-label">Setup Guide</p>
+      <h2 class="section-title serif">Up and running in minutes</h2>
+      <p class="section-desc">
+        Three steps to your own local AI assistant.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3 class="serif">Install Ollama</h3>
+            <p>
+              Download <a href="https://ollama.ai" target="_blank">Ollama</a> and pull the models:
+              <code>ollama pull qwen2.5:7b</code> and <code>ollama pull deepseek-coder:6.7b</code>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3 class="serif">Start the Backend</h3>
+            <p>
+              Clone the repo, install dependencies, and run:
+              <code>python -m uvicorn backend.api.main:app --reload</code>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3 class="serif">Launch the Desktop App</h3>
+            <p>
+              Run <code>npm run dev</code> in the windows app directory.
+              The DELIAH window opens and connects automatically.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="arch" id="architecture">
+    <div class="arch-inner">
+      <p class="section-label">Architecture</p>
+      <h2 class="section-title serif">How it works</h2>
+      <p class="section-desc">
+        A clean, modular architecture that keeps everything local.
+      </p>
+      <div class="arch-diagram">
+  Desktop App (React + Tauri)
+         |
+         | HTTP / WebSocket
+         v
+  DELIAH Backend (Python + FastAPI)
+         |
+         | HTTP
+         v
+  Ollama (Local LLM Runtime)
+         |
+         v
+  AI Models (Qwen, DeepSeek, Llama)
+
+  Android Companion (Flutter)
+         |
+         | HTTP / WebSocket
+         v
+  DELIAH Backend (same network)</div>
+    </div>
+  </section>
+
+  <section class="download" id="download">
+    <div class="download-inner">
+      <p class="section-label">Get Started</p>
+      <h2 class="section-title serif">Try DELIAH today</h2>
+      <p class="section-desc">
+        Free and open source. Your AI, your machine, your rules.
+      </p>
+      <div class="download-btns">
+        <a href="https://github.com/gelliello/DELIAH/releases/latest" class="btn btn-primary" target="_blank">
+          Download Latest Release
+        </a>
+        <a href="https://github.com/gelliello/DELIAH" class="btn btn-secondary" target="_blank">
+          View Source Code
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p class="serif">
+      DELIAH &mdash; Digital Enhanced Local Intelligence Assistant Hub<br>
+      <a href="https://github.com/gelliello/DELIAH" target="_blank">GitHub</a> &middot; MIT License
+    </p>
+  </footer>
+
+</body>
+</html>
